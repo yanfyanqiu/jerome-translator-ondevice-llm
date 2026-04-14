@@ -43,6 +43,7 @@ fun SettingsSheet(
     state: TranslationUiState,
     onGrammarToggle: (Boolean) -> Unit,
     onNoThinkToggle: (Boolean) -> Unit,
+    onDebugOutputToggle: (Boolean) -> Unit,
     onPresetSelected: (ModelPreset) -> Unit,
     onDeleteModelAndSwitch: (oldPreset: ModelPreset, newPreset: ModelPreset) -> Unit,
     onDeleteModel: (ModelPreset) -> Unit,
@@ -116,6 +117,26 @@ fun SettingsSheet(
                 subtitle = "Prevents the model from generating internal reasoning. Faster output.",
                 checked = state.noThinkEnabled,
                 onCheckedChange = onNoThinkToggle,
+            )
+
+            Spacer(Modifier.height(16.dp))
+            HorizontalDivider()
+            Spacer(Modifier.height(16.dp))
+
+            // --- Debug section ---
+            Text(
+                "Debug",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            SettingSwitch(
+                title = "Show raw LLM output",
+                subtitle = "Display the raw response from the model below the translation result.",
+                checked = state.showDebugOutput,
+                onCheckedChange = onDebugOutputToggle,
             )
 
             Spacer(Modifier.height(16.dp))

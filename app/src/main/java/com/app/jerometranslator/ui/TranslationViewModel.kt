@@ -46,6 +46,8 @@ data class TranslationUiState(
     val downloadedModels: List<DownloadedModelInfo> = emptyList(),
     val warning: String? = null,
     val error: String? = null,
+    val showDebugOutput: Boolean = false,
+    val rawLlmOutput: String? = null,
 )
 
 data class DownloadedModelInfo(
@@ -196,6 +198,10 @@ class TranslationViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    fun setShowDebugOutput(enabled: Boolean) {
+        _state.update { it.copy(showDebugOutput = enabled) }
+    }
+
     fun selectPreset(preset: ModelPreset) {
         if (preset.id == activePreset.id) return
         translateJob?.cancel()
@@ -235,6 +241,7 @@ class TranslationViewModel(application: Application) : AndroidViewModel(applicat
                     it.copy(
                         outputText = result.text,
                         warning = result.warning,
+                        rawLlmOutput = result.rawOutput,
                         isTranslating = false,
                         lastTranslationTimeMs = elapsedMs,
                         averageTranslationTimeMs = avg,

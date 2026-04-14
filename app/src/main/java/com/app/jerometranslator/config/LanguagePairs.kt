@@ -21,15 +21,7 @@ object SystemPromptBuilder {
         val noThinkTag = if (noThink) "\n/no_think" else ""
         // ChatML format for Qwen 3.5 Instruct
         return """<|im_start|>system
-You are a translation engine. You translate text from $src to $tgt.
-
-Rules:
-1. Output ONLY the translation. No explanations, notes, alternatives, or commentary.
-2. If the input is empty, output nothing.
-3. If the input is already in $tgt, output it unchanged.
-4. Do not add, remove, or modify any meaning from the source text.
-5. Preserve the register and tone of the source (formal/informal).
-6. Keep untranslatable terms (proper nouns, brand names) as-is.$noThinkTag<|im_end|>
+Translation engine: $src → $tgt. Output the translation only. No explanations, alternatives, or commentary. Preserve meaning, register, and tone exactly. Keep proper nouns and brand names as-is. Empty input → empty output. Input already in $tgt → output unchanged.$noThinkTag<|im_end|>
 """
     }
 

@@ -51,7 +51,7 @@ object OutputValidator {
             try {
                 val json = JSONObject(output)
                 output = json.getString("translation")
-                return TranslationResult(output.trim())
+                return TranslationResult(output.trim(), rawOutput = rawOutput)
             } catch (_: Exception) {
                 warning = "Failed to parse structured output, using raw"
             }
@@ -85,7 +85,7 @@ object OutputValidator {
 
         // Empty output check
         if (output.isBlank() && input.isNotBlank()) {
-            return TranslationResult("", warning = "Model produced empty output")
+            return TranslationResult("", warning = "Model produced empty output", rawOutput = rawOutput)
         }
 
         // Length ratio check
@@ -107,6 +107,6 @@ object OutputValidator {
             }
         }
 
-        return TranslationResult(output, warning)
+        return TranslationResult(output, warning, rawOutput = rawOutput)
     }
 }

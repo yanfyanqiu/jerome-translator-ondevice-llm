@@ -393,6 +393,25 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
                                 color = MaterialTheme.colorScheme.error,
                             )
                         }
+
+                        // Debug: raw LLM output
+                        val rawOutput = state.rawLlmOutput
+                        if (state.showDebugOutput && !rawOutput.isNullOrBlank()) {
+                            Spacer(Modifier.height(8.dp))
+                            HorizontalDivider()
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = "Raw LLM output:",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = rawOutput,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                            )
+                        }
                     }
                 }
             }
@@ -426,6 +445,7 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
             state = state,
             onGrammarToggle = { viewModel.setGrammarEnabled(it) },
             onNoThinkToggle = { viewModel.setNoThinkEnabled(it) },
+            onDebugOutputToggle = { viewModel.setShowDebugOutput(it) },
             onPresetSelected = {
                 viewModel.selectPreset(it)
                 showSettings = false

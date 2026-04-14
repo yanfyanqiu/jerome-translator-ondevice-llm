@@ -11,6 +11,7 @@ import kotlinx.coroutines.withContext
 data class TranslationResult(
     val text: String,
     val warning: String? = null,
+    val rawOutput: String = "",
 )
 
 class TranslationEngine {
