@@ -113,7 +113,7 @@ fun SettingsSheet(
             )
 
             SettingSwitch(
-                title = "Disable reasoning (/no_think)",
+                title = "关闭推理（<no_think>）",
                 subtitle = "阻止模型生成内部推理过程，输出更快。",
                 checked = state.noThinkEnabled,
                 onCheckedChange = onNoThinkToggle,
