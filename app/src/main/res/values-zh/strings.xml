@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Jerome 翻译官</string>
+    <string name="conference_mode">会议模式</string>
+    <string name="local_model">本地模型</string>
+    <string name="no_model_tap_import">未选择模型 - 点击选择文件</string>
+    <string name="import_gguf">导入 GGUF</string>
+    <string name="import_gguf_desc">从手机选择 GGUF 文件</string>
+    <string name="local_gguf_models">本机 GGUF 模型</string>
+    <string name="no_models_imported">尚未导入任何模型。</string>
+    <string name="import_success">已导入：%1$s</string>
+    <string name="import_failed">导入失败 - 请确认是有效的 GGUF 文件。</string>
+    <string name="refresh">刷新</string>
+    <string name="swap_languages">交换语言</string>
+    <string name="conference_mode_off">会议模式已关闭</string>
+    <string name="listening">正在聆听…</string>
+    <string name="translating">正在翻译…</string>
+    <string name="speaking">正在播报…</string>
+    <string name="detected">检测到：%1$s</string>
+    <string name="heard_label">原文（%1$s）：</string>
+    <string name="translation_label">译文（%1$s）：</string>
+    <string name="loading_model">正在加载模型…（首次启动需要一些时间）</string>
+    <string name="start_conference">开始会议</string>
+    <string name="stop_conference">停止会议</string>
+    <string name="mic_permission_required">需要麦克风权限。</string>
+</resources>
