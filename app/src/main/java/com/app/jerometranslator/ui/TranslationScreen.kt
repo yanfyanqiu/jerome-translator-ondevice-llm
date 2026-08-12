@@ -140,6 +140,17 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
                     modifier = Modifier.padding(horizontal = 12.dp),
                 )
 
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Default.Mic, contentDescription = null) },
+                    label = { Text("Conference") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        // Navigate to conference mode - show ConferenceScreen
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                )
+
                 Spacer(Modifier.weight(1f))
 
                 HorizontalDivider()
