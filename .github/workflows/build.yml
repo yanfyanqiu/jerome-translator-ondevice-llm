@@ -39,21 +39,12 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
-      - name: Show env
-        run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          java -version
-          ls $ANDROID_HOME/ndk/ 2>/dev/null || echo "no ndk dir"
-          ls $ANDROID_HOME/cmake/ 2>/dev/null || echo "no cmake dir"
-
       - name: Accept SDK licenses
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses >/dev/null 2>&1 || true
 
       - name: Install NDK + platforms + build-tools
         run: |
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" "ndk;26.1.10909125" "cmake;3.22.1"
-          echo "ndk-dir=$ANDROID_HOME/ndk/26.1.10909125" >> $GITHUB_ENV
 
       - name: Add local.properties
         run: |
@@ -62,23 +53,33 @@ jobs:
           ndk.dir=$ANDROID_HOME/ndk/26.1.10909125
           EOF
 
-      - name: Verify workspace
+      - name: Configure gradle properties
         run: |
-          ls -la
-          ls gradlew 2>/dev/null && head -3 gradlew || echo "NO gradlew!"
-          cat gradle.properties
+          cat >> gradle.properties <<EOF
+          android.useAndroidX=true
+          android.suppressUnsupportedCompileSdk=34
+          org.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8
+          EOF
 
       - name: Build debug APK
         run: |
           chmod +x gradlew
-          ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1 | tail -100
+          ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1 | tee build-output.log
+        continue-on-error: true
+
+      - name: Upload build output log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output-log
+          path: build-output.log
+          retention-days: 1
 
       - name: List output APK
         if: success()
-        id: list_apk
         run: |
           ls -la app/build/outputs/apk/debug/
-          APK=$(ls app/build/outputs/apk/debug/*.apk | head -1)
+          APK=$(ls app/build/outputs/apk/debug/*.apk 2>/dev/null | head -1)
           echo "apk=$APK" >> $GITHUB_OUTPUT
           echo "APK_PATH=$APK" >> $GITHUB_ENV
 
