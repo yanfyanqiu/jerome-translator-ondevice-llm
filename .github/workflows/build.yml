@@ -48,65 +48,87 @@ jobs:
 
       - name: Download gradle wrapper
         run: |
-          WRAPPER_URL="https://raw.githubusercontent.com/gradle/gradle/v8.9.0/gradle/wrapper/gradle-wrapper.jar"
-          curl -fsSL -o gradle/wrapper/gradle-wrapper.jar "$WRAPPER_URL"
+          WRAPPER_URL="https://github.com/gradle/gradle/raw/v8.9.0/gradle/wrapper/gradle-wrapper.jar"
+          echo "Downloading wrapper jar from: $WRAPPER_URL"
+          curl -fsSL -o gradle/wrapper/gradle-wrapper.jar "$WRAPPER_URL" 2>&1 | tee dl.log
+          ls -la gradle/wrapper/gradle-wrapper.jar
+          file gradle/wrapper/gradle-wrapper.jar
+          # Verify it's a valid JAR
+          if ! unzip -t gradle/wrapper/gradle-wrapper.jar > /dev/null 2>&1; then
+            echo "ERROR: gradle-wrapper.jar is not a valid JAR"
+          fi
           cat > gradlew << 'WRAPPER_SCRIPT'
           #!/bin/sh
-          APP_NAME="Gradle"
-          APP_BASE_NAME=`basename "$0"`
-          DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
-          CLASSPATH=`dirname "$0"`/gradle/wrapper/gradle-wrapper.jar
+          APP_BASE_NAME=$(basename "$0")
+          CLASSPATH=$(dirname "$0")/gradle/wrapper/gradle-wrapper.jar
           JAVACMD="java"
-          exec "$JAVACMD" $DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS             "-Dorg.gradle.appname=$APP_BASE_NAME"             -classpath "$CLASSPATH"             org.gradle.wrapper.GradleWrapperMain "$@"
+          exec "$JAVACMD" "-Xmx64m" "-Xms64m" $JAVA_OPTS $GRADLE_OPTS             "-Dorg.gradle.appname=$APP_BASE_NAME"             -classpath "$CLASSPATH"             org.gradle.wrapper.GradleWrapperMain "$@"
           WRAPPER_SCRIPT
           chmod +x gradlew
-          ls -la gradlew gradle/wrapper/gradle-wrapper.jar
+          ls -la gradlew
         shell: bash
 
       - name: Add local.properties
         run: |
-          printf 'sdk.dir=%s\nndk.dir=%s\n' "$ANDROID_HOME" "$ANDROID_HOME/ndk/26.1.10909125" > local.properties
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          echo "ndk.dir=$ANDROID_HOME/ndk/26.1.10909125" >> local.properties
+          cat local.properties
         shell: bash
 
       - name: Configure gradle properties
         run: |
-          printf 'android.useAndroidX=true\nandroid.suppressUnsupportedCompileSdk=34\norg.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8\n' >> gradle.properties
+          echo "android.useAndroidX=true" >> gradle.properties
+          echo "android.suppressUnsupportedCompileSdk=34" >> gradle.properties
+          echo "org.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8" >> gradle.properties
+          cat gradle.properties
+        shell: bash
+
+      - name: Environment diagnostics
+        run: |
+          echo "JAVA_HOME=$JAVA_HOME"
+          echo "java -version:"
+          java -version 2>&1
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          ls $ANDROID_HOME/platforms/ 2>/dev/null || echo "No platforms"
+          ls $ANDROID_HOME/build-tools/ 2>/dev/null || echo "No build-tools"
+          ls $ANDROID_HOME/ndk/ 2>/dev/null || echo "No NDK"
+          ls gradlew && head -3 gradlew
         shell: bash
 
       - name: List available build variants
         run: |
           chmod +x gradlew
-          ./gradlew tasks --group=build 2>&1 | grep -E "assemble|build" | head -30
+          ./gradlew tasks --group=build --no-daemon 2>&1 | tee variants.log
+          echo "EXIT=$?" >> $GITHUB_ENV
         shell: bash
+        continue-on-error: true
 
       - name: Build debug APK
         run: |
           chmod +x gradlew
-          ./gradlew :app:assembleDebug --no-daemon 2>&1
-          echo "GRADLE_EXIT=$?" >> $GITHUB_ENV
-        shell: bash
-
-      - name: Upload build log
-        if: always()
-        run: |
-          echo "GRADLE_EXIT=${{ env.GRADLE_EXIT }}" >> build-status.txt
-          cat build-status.txt
+          ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
+          echo "BUILD_EXIT=$?" >> $GITHUB_ENV
         shell: bash
         continue-on-error: true
 
-      - name: Upload build output artifact
+      - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v5
         with:
-          name: build-output-log
-          path: build-status.txt
+          name: build-logs
+          path: |
+            build.log
+            variants.log
+            gradle.log
           retention-days: 1
+          continue-on-error: true
 
       - name: List output APK
         run: |
-          ls -la app/build/outputs/apk/debug/ 2>&1 || echo "DEBUG_DIR_NOT_FOUND"
-          ls -la app/build/outputs/apk/ 2>&1 || echo "APK_DIR_NOT_FOUND"
-          echo "APK_PATH=$(ls app/build/outputs/apk/debug/*.apk 2>/dev/null | head -1 || echo '')" >> $GITHUB_OUTPUT
+          find app/build -name "*.apk" 2>/dev/null || echo "NO_APK_FOUND"
+          ls -la app/build/outputs/apk/debug/ 2>/dev/null || echo "DEBUG_DIR_MISSING"
+          echo "APK_PATH=$(find app/build -name "*.apk" 2>/dev/null | head -1)" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Upload APK artifact
