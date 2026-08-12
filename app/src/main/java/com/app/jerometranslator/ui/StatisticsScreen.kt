@@ -134,7 +134,7 @@ fun StatisticsScreen(
                     ) {
                         Text("上下文长度", style = MaterialTheme.typography.bodyMedium)
                         Text(
-                            "${state.activePreset.contextSize} tokens",
+                            "${state.activePreset.contextSize} 词元",
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }

@@ -77,7 +77,7 @@ fun LanguageSelectorSheet(
                         supportingContent = { Text(language.nativeName) },
                         trailingContent = {
                             if (isSelected) {
-                                Icon(Icons.Default.Check, contentDescription = "Selected")
+                                Icon(Icons.Default.Check, contentDescription = "已选")
                             }
                         },
                         modifier = Modifier.clickable {
