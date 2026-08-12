@@ -1,4 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Jerome Translator</string>
+    <string name="conference_mode">Conference Mode</string>
+    <string name="local_model">Local Model</string>
+    <string name="no_model_tap_import">No model - tap to import</string>
+    <string name="import_gguf">Import GGUF</string>
+    <string name="import_gguf_desc">Select GGUF from Device</string>
+    <string name="local_gguf_models">Local GGUF Models</string>
+    <string name="no_models_imported">No models imported yet.</string>
+    <string name="import_success">Imported: %1$s</string>
+    <string name="import_failed">Import failed - make sure it is a valid GGUF file.</string>
+    <string name="refresh">Refresh</string>
+    <string name="swap_languages">Swap languages</string>
+    <string name="conference_mode_off">Conference Mode is off</string>
+    <string name="listening">Listening…</string>
+    <string name="translating">Translating…</string>
+    <string name="speaking">Speaking…</string>
+    <string name="detected">Detected: %1$s</string>
+    <string name="heard_label">Heard (%1$s):</string>
+    <string name="translation_label">Translation (%1$s):</string>
+    <string name="loading_model">Loading model… (first start takes a moment)</string>
+    <string name="start_conference">Start Conference</string>
+    <string name="stop_conference">Stop Conference</string>
+    <string name="mic_permission_required">Microphone permission is required.</string>
 </resources>
