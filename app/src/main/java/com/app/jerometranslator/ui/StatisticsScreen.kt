@@ -38,10 +38,10 @@ fun StatisticsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Statistics") },
+                title = { Text("统计") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
                     }
                 },
             )
@@ -55,7 +55,7 @@ fun StatisticsScreen(
         ) {
             // Session performance
             Text(
-                "Session Performance",
+                "本次会话表现",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -72,7 +72,7 @@ fun StatisticsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("Total translations", style = MaterialTheme.typography.bodyMedium)
+                        Text("翻译次数", style = MaterialTheme.typography.bodyMedium)
                         Text(
                             "${state.totalTranslations}",
                             style = MaterialTheme.typography.bodyMedium,
@@ -83,7 +83,7 @@ fun StatisticsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("Last translation", style = MaterialTheme.typography.bodyMedium)
+                        Text("上次翻译", style = MaterialTheme.typography.bodyMedium)
                         Text(
                             state.lastTranslationTimeMs?.let { formatTime(it) } ?: "--",
                             style = MaterialTheme.typography.bodyMedium,
@@ -94,7 +94,7 @@ fun StatisticsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("Average time", style = MaterialTheme.typography.bodyMedium)
+                        Text("平均耗时", style = MaterialTheme.typography.bodyMedium)
                         Text(
                             state.averageTranslationTimeMs?.let { formatTime(it) } ?: "--",
                             style = MaterialTheme.typography.bodyMedium,
@@ -107,7 +107,7 @@ fun StatisticsScreen(
 
             // Current model info
             Text(
-                "Current Model",
+                "当前模型",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -124,7 +124,7 @@ fun StatisticsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("Mode", style = MaterialTheme.typography.bodyMedium)
+                        Text("模式", style = MaterialTheme.typography.bodyMedium)
                         Text(state.activePreset.label, style = MaterialTheme.typography.bodyMedium)
                     }
                     Spacer(Modifier.height(8.dp))
@@ -132,7 +132,7 @@ fun StatisticsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("Context size", style = MaterialTheme.typography.bodyMedium)
+                        Text("上下文长度", style = MaterialTheme.typography.bodyMedium)
                         Text(
                             "${state.activePreset.contextSize} tokens",
                             style = MaterialTheme.typography.bodyMedium,
@@ -143,9 +143,9 @@ fun StatisticsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("Grammar", style = MaterialTheme.typography.bodyMedium)
+                        Text("语法约束", style = MaterialTheme.typography.bodyMedium)
                         Text(
-                            if (state.grammarEnabled) "Enabled" else "Disabled",
+                            if (state.grammarEnabled) "已开启" else "已关闭",
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
@@ -156,7 +156,7 @@ fun StatisticsScreen(
                     ) {
                         Text("Reasoning", style = MaterialTheme.typography.bodyMedium)
                         Text(
-                            if (state.noThinkEnabled) "Disabled" else "Enabled",
+                            if (state.noThinkEnabled) "已关闭" else "已开启",
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
@@ -167,7 +167,7 @@ fun StatisticsScreen(
 
             // Languages
             Text(
-                "Current Pair",
+                "当前语言对",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
             )

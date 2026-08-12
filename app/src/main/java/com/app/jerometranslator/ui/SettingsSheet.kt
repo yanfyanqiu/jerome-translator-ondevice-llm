@@ -58,23 +58,23 @@ fun SettingsSheet(
     pendingPreset?.let { newPreset ->
         AlertDialog(
             onDismissRequest = { pendingPreset = null },
-            title = { Text("Remove current model?") },
+            title = { Text("移除当前模型？") },
             text = {
-                Text("Do you want to remove the current model (${state.activePreset.label}) to free disk space?")
+                Text("是否移除当前模型（${state.activePreset.label}）以释放存储空间？")
             },
             confirmButton = {
                 TextButton(onClick = {
                     val old = state.activePreset
                     pendingPreset = null
                     onDeleteModelAndSwitch(old, newPreset)
-                }) { Text("Yes, remove") }
+                }) { Text("移除") }
             },
             dismissButton = {
                 TextButton(onClick = {
                     val preset = newPreset
                     pendingPreset = null
                     onPresetSelected(preset)
-                }) { Text("No, keep") }
+                }) { Text("保留") }
             },
         )
     }
@@ -91,14 +91,14 @@ fun SettingsSheet(
                 .verticalScroll(rememberScrollState()),
         ) {
             Text(
-                "Settings",
+                "设置",
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(bottom = 16.dp),
             )
 
             // --- Advanced section ---
             Text(
-                "Advanced",
+                "高级",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -106,15 +106,15 @@ fun SettingsSheet(
             Spacer(Modifier.height(8.dp))
 
             SettingSwitch(
-                title = "Structured output (Grammar)",
-                subtitle = "Constrains model output to JSON format. Prevents hallucination and improves speed.",
+                title = "结构化输出（语法约束）",
+                subtitle = "将模型输出限制为 JSON 格式，防止幻觉并提升速度。",
                 checked = state.grammarEnabled,
                 onCheckedChange = onGrammarToggle,
             )
 
             SettingSwitch(
                 title = "Disable reasoning (/no_think)",
-                subtitle = "Prevents the model from generating internal reasoning. Faster output.",
+                subtitle = "阻止模型生成内部推理过程，输出更快。",
                 checked = state.noThinkEnabled,
                 onCheckedChange = onNoThinkToggle,
             )
@@ -125,7 +125,7 @@ fun SettingsSheet(
 
             // --- Debug section ---
             Text(
-                "Debug",
+                "调试",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -133,8 +133,8 @@ fun SettingsSheet(
             Spacer(Modifier.height(8.dp))
 
             SettingSwitch(
-                title = "Show raw LLM output",
-                subtitle = "Display the raw response from the model below the translation result.",
+                title = "显示原始模型输出",
+                subtitle = "在翻译结果下方显示模型的原始回复。",
                 checked = state.showDebugOutput,
                 onCheckedChange = onDebugOutputToggle,
             )
@@ -145,12 +145,12 @@ fun SettingsSheet(
 
             // --- Model selection section ---
             Text(
-                "Model",
+                "模型",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
             Text(
-                "Changing the model will download it if not already present.",
+                "切换模型会在未下载时自动下载。",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -176,7 +176,7 @@ fun SettingsSheet(
                 Spacer(Modifier.height(16.dp))
 
                 Text(
-                    "Downloaded Models",
+                    "已下载模型",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -203,7 +203,7 @@ fun SettingsSheet(
                         }
                         if (model.isActive) {
                             Text(
-                                "Active",
+                                "使用中",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(end = 12.dp),
@@ -212,7 +212,7 @@ fun SettingsSheet(
                             IconButton(onClick = { onDeleteModel(model.preset) }) {
                                 Icon(
                                     Icons.Default.Delete,
-                                    contentDescription = "Delete ${model.preset.label}",
+                                    contentDescription = "删除 ${model.preset.label}",
                                     tint = MaterialTheme.colorScheme.error,
                                 )
                             }

@@ -42,7 +42,7 @@ fun DownloadScreen(
             AppPhase.CHECKING_MODEL -> {
                 CircularProgressIndicator()
                 Spacer(Modifier.height(16.dp))
-                Text("Checking model...")
+                Text("正在检查模型…")
             }
 
             AppPhase.DOWNLOADING -> {
@@ -56,7 +56,7 @@ fun DownloadScreen(
                 Spacer(Modifier.height(24.dp))
 
                 Text(
-                    "Downloading $modelLabel model",
+                    "正在下载 $modelLabel 模型",
                     style = MaterialTheme.typography.headlineSmall,
                     textAlign = TextAlign.Center,
                 )
@@ -80,7 +80,7 @@ fun DownloadScreen(
                     )
                     Spacer(Modifier.height(16.dp))
                     Button(onClick = onRetry) {
-                        Text("Retry Download")
+                        Text("重试下载")
                     }
                 } else {
                     LinearProgressIndicator(
@@ -99,12 +99,12 @@ fun DownloadScreen(
                 CircularProgressIndicator()
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    "Loading model into memory...",
+                    "正在将模型载入内存…",
                     style = MaterialTheme.typography.bodyLarge,
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "This may take a few seconds",
+                    "这可能需要几秒钟",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 )

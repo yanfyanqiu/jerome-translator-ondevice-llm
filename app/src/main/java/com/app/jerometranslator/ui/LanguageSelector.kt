@@ -59,7 +59,7 @@ fun LanguageSelectorSheet(
                 value = query,
                 onValueChange = { query = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Search languages") },
+                placeholder = { Text("搜索语言") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 singleLine = true,
             )

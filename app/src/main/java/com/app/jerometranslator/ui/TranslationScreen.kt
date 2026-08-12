@@ -121,7 +121,7 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
 
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.BarChart, contentDescription = null) },
-                    label = { Text("Statistics") },
+                    label = { Text("统计") },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -131,7 +131,7 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
                 )
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.History, contentDescription = null) },
-                    label = { Text("History") },
+                    label = { Text("历史") },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -142,7 +142,7 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
 
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.Mic, contentDescription = null) },
-                    label = { Text("Conference") },
+                    label = { Text("会议模式") },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -156,7 +156,7 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
                 HorizontalDivider()
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                    label = { Text("Settings") },
+                    label = { Text("设置") },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -166,7 +166,7 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
                 )
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Default.ExitToApp, contentDescription = null) },
-                    label = { Text("Exit") },
+                    label = { Text("退出") },
                     selected = false,
                     onClick = { activity?.finish() },
                     modifier = Modifier.padding(horizontal = 12.dp),
@@ -178,17 +178,17 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Jerome Translator") },
+                title = { Text("Jerome 翻译官") },
                 navigationIcon = {
                     IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        Icon(Icons.Default.Menu, contentDescription = "菜单")
                     }
                 },
                 actions = {
                     IconButton(onClick = { viewModel.toggleStats() }) {
                         Icon(
                             Icons.Default.BarChart,
-                            contentDescription = "Statistics",
+                            contentDescription = "统计",
                             tint = if (state.showStats) MaterialTheme.colorScheme.primary
                                    else MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -207,7 +207,7 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
         ) {
             // Mode indicator
             Text(
-                text = "${state.activePreset.label} mode",
+                text = "${state.activePreset.label} 模式",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
@@ -229,14 +229,14 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
                         horizontalArrangement = Arrangement.SpaceEvenly,
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("Last", style = MaterialTheme.typography.labelSmall)
+                            Text("上次", style = MaterialTheme.typography.labelSmall)
                             Text(
                                 text = state.lastTranslationTimeMs?.let { "${it}ms" } ?: "--",
                                 style = MaterialTheme.typography.titleMedium,
                             )
                         }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("Average", style = MaterialTheme.typography.labelSmall)
+                            Text("平均", style = MaterialTheme.typography.labelSmall)
                             Text(
                                 text = state.averageTranslationTimeMs?.let { "${it}ms" } ?: "--",
                                 style = MaterialTheme.typography.titleMedium,
@@ -260,7 +260,7 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
                 }
 
                 IconButton(onClick = { viewModel.swapLanguages() }) {
-                    Icon(Icons.Default.SwapHoriz, contentDescription = "Swap languages")
+                    Icon(Icons.Default.SwapHoriz, contentDescription = "交换语言")
                 }
 
                 FilledTonalButton(
@@ -281,7 +281,7 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
                     .fillMaxWidth()
                     .height(150.dp),
                 label = { Text(state.sourceLanguage.displayName) },
-                placeholder = { Text("Enter text to translate") },
+                placeholder = { Text("输入要翻译的文本") },
                 trailingIcon = {
                     if (state.sourceLanguage.voiceInputSupported && sttAvailable) {
                         IconButton(
@@ -299,7 +299,7 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
                         ) {
                             Icon(
                                 if (state.isListening) Icons.Default.Stop else Icons.Default.Mic,
-                                contentDescription = if (state.isListening) "Stop" else "Speak",
+                                contentDescription = if (state.isListening) "停止" else "说话",
                                 tint = if (state.isListening) MaterialTheme.colorScheme.error
                                        else MaterialTheme.colorScheme.primary,
                             )
@@ -323,11 +323,11 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
                         color = MaterialTheme.colorScheme.onPrimary,
                     )
                     Spacer(Modifier.width(8.dp))
-                    Text("Translating...")
+                    Text("翻译中…")
                 } else {
                     Icon(Icons.Default.Translate, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Translate")
+                    Text("翻译")
                 }
             }
 
@@ -375,7 +375,7 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
                                     Icon(
                                         if (state.isSpeaking) Icons.Default.Stop
                                         else Icons.AutoMirrored.Filled.VolumeUp,
-                                        contentDescription = "Read aloud",
+                                        contentDescription = "朗读",
                                         tint = if (ttsSupported) MaterialTheme.colorScheme.onPrimaryContainer
                                                else MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.4f),
                                     )
@@ -389,7 +389,7 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
                             ) {
                                 Icon(
                                     Icons.Default.ContentCopy,
-                                    contentDescription = "Copy",
+                                    contentDescription = "复制",
                                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                                 )
                             }
@@ -412,7 +412,7 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
                             HorizontalDivider()
                             Spacer(Modifier.height(8.dp))
                             Text(
-                                text = "Raw LLM output:",
+                                text = "原始模型输出：",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
                             )

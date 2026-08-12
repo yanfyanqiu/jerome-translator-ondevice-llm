@@ -61,7 +61,7 @@ fun OnboardingScreen(
         Spacer(Modifier.height(16.dp))
 
         Text(
-            "Welcome to Jerome Translator",
+            "欢迎使用 Jerome 翻译官",
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
         )
@@ -69,8 +69,8 @@ fun OnboardingScreen(
         Spacer(Modifier.height(24.dp))
 
         Text(
-            "Jerome translates text entirely on your device using AI. " +
-                "No internet connection is needed after the initial download.",
+            "Jerome 使用 AI 在您的设备本地完成翻译。首次下载模型后，无需联网即可使用。" +
+                "",
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -93,9 +93,9 @@ fun OnboardingScreen(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "Translation quality depends on the quality level you choose and your device's hardware. " +
-                        "Higher quality levels produce better results but require more storage and run slower. " +
-                        "If unsure, the default is a good starting point. " +
+                    "翻译质量取决于所选档位与设备硬件。档位越高效果越好，但占用空间更大、速度更慢。不确定就选默认即可。效果因人而异——这是设备端实验性 AI。" +
+                        "" +
+                        "" +
                         "Results may vary \u2014 this is experimental, on-device AI.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onTertiaryContainer,
@@ -107,7 +107,7 @@ fun OnboardingScreen(
 
         // Quality picker
         Text(
-            "Translation quality",
+            "翻译质量",
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -125,7 +125,7 @@ fun OnboardingScreen(
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded) },
                 modifier = Modifier.menuAnchor().fillMaxWidth(),
-                label = { Text("Quality level") },
+                label = { Text("质量档位") },
             )
 
             ExposedDropdownMenu(
@@ -159,7 +159,7 @@ fun OnboardingScreen(
             onClick = { onContinue(selectedPreset) },
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text("Next")
+            Text("下一步")
         }
     }
 }

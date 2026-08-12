@@ -46,7 +46,7 @@ fun HistoryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("History") },
+                title = { Text("历史") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -55,7 +55,7 @@ fun HistoryScreen(
                 actions = {
                     if (history.isNotEmpty()) {
                         IconButton(onClick = { viewModel.clearHistory() }) {
-                            Icon(Icons.Default.DeleteSweep, contentDescription = "Clear all")
+                            Icon(Icons.Default.DeleteSweep, contentDescription = "清空全部")
                         }
                     }
                 },
@@ -71,7 +71,7 @@ fun HistoryScreen(
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
-                    "No translations yet",
+                    "还没有翻译记录",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -127,7 +127,7 @@ private fun HistoryItem(
                     IconButton(onClick = onDelete) {
                         Icon(
                             Icons.Default.Delete,
-                            contentDescription = "Delete",
+                            contentDescription = "删除",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
