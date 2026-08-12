@@ -8,6 +8,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.app.jerometranslator.ui.AppPhase
+import com.app.jerometranslator.ui.ConferenceScreen
+import com.app.jerometranslator.ui.ConferenceViewModel
 import com.app.jerometranslator.ui.DownloadScreen
 import com.app.jerometranslator.ui.HistoryScreen
 import com.app.jerometranslator.ui.OnboardingScreen
@@ -24,24 +26,17 @@ class MainActivity : ComponentActivity() {
         setContent {
             JeromeTheme {
                 val viewModel: TranslationViewModel = viewModel()
+                val conferenceViewModel: ConferenceViewModel = viewModel()
                 val state by viewModel.state.collectAsState()
 
                 when (state.appPhase) {
                     AppPhase.ONBOARDING -> JeromeTheme(darkTheme = true) {
-                        OnboardingScreen(
-                            onContinue = { preset -> viewModel.completeOnboarding(preset) },
-                        )
+                        OnboardingScreen(onContinue = { preset -> viewModel.completeOnboarding(preset) })
                     }
                     AppPhase.READY -> when (state.currentScreen) {
                         ScreenRoute.TRANSLATION -> TranslationScreen(viewModel)
-                        ScreenRoute.HISTORY -> HistoryScreen(
-                            viewModel = viewModel,
-                            onBack = { viewModel.navigateTo(ScreenRoute.TRANSLATION) },
-                        )
-                        ScreenRoute.STATISTICS -> StatisticsScreen(
-                            viewModel = viewModel,
-                            onBack = { viewModel.navigateTo(ScreenRoute.TRANSLATION) },
-                        )
+                        ScreenRoute.HISTORY -> HistoryScreen(viewModel = viewModel, onBack = { viewModel.navigateTo(ScreenRoute.TRANSLATION) })
+                        ScreenRoute.STATISTICS -> StatisticsScreen(viewModel = viewModel, onBack = { viewModel.navigateTo(ScreenRoute.TRANSLATION) })
                     }
                     else -> DownloadScreen(
                         phase = state.appPhase,
