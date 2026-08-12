@@ -51,6 +51,7 @@ jobs:
         run: |
           WRAPPER_URL="https://github.com/gradle/gradle/raw/v8.9.0/gradle/wrapper/gradle-wrapper.jar"
           curl -fsSL -o gradle/wrapper/gradle-wrapper.jar "$WRAPPER_URL"
+          file gradle/wrapper/gradle-wrapper.jar
           cat > gradlew << 'WRAPPER_SCRIPT'
           #!/bin/sh
           APP_BASE_NAME=$(basename "$0")
@@ -58,7 +59,6 @@ jobs:
           exec java "-Xmx64m" "-Xms64m" $JAVA_OPTS $GRADLE_OPTS             "-Dorg.gradle.appname=$APP_BASE_NAME"             -classpath "$CLASSPATH"             org.gradle.wrapper.GradleWrapperMain "$@"
           WRAPPER_SCRIPT
           chmod +x gradlew
-          file gradle/wrapper/gradle-wrapper.jar
 
       - name: Add local.properties
         run: |
@@ -71,46 +71,43 @@ jobs:
           echo "android.suppressUnsupportedCompileSdk=34" >> gradle.properties
           echo "org.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8" >> gradle.properties
 
-      - name: Environment diagnostics
-        run: |
-          echo "JAVA_HOME=$JAVA_HOME"
-          java -version 2>&1
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          ls $ANDROID_HOME/platforms/
-          ls $ANDROID_HOME/build-tools/
-          ls $ANDROID_HOME/ndk/ || echo "NO NDK"
-          head -3 gradlew
-
-      - name: List available build variants
-        continue-on-error: true
+      - name: Run gradle version check
         run: |
           chmod +x gradlew
-          ./gradlew tasks --group=build --no-daemon 2>&1
+          ./gradlew --version 2>&1 | head -20
+
+      - name: Run gradle tasks
+        continue-on-error: true
+        run: |
+          ./gradlew tasks --no-daemon 2>&1 | head -100
 
       - name: Build debug APK
         continue-on-error: true
         run: |
           chmod +x gradlew
-          ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1 | tail -200
-
-      - name: Upload build log
-        if: always()
-        uses: actions/upload-artifact@v5
-        with:
-          name: build-logs
-          path: build.log
-          retention-days: 1
+          ./gradlew :app:assembleDebug --no-daemon 2>&1 > build.log
+          echo "GRADLE_EXIT=$?" >> build.log
+          tail -50 build.log
 
       - name: Find APK
         run: |
           echo "APK_PATH=$(find app/build -name '*.apk' 2>/dev/null | head -1 || echo '')" >> $GITHUB_OUTPUT
-          find app/build -name '*.apk' 2>/dev/null && echo "APK_FOUND=yes" >> $GITHUB_ENV
+          find app/build -type f -name '*.apk' 2>/dev/null || echo "NO_APK_FOUND"
 
       - name: Upload APK artifact
-        if: success() && env.APK_FOUND == 'yes'
+        if: success()
         uses: actions/upload-artifact@v5
         with:
           name: jerome-debug-apk
           path: ${{ env.APK_PATH }}
           if-no-files-found: error
           retention-days: 7
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: build-log
+          path: build.log
+          if-no-files-found: warn
+          retention-days: 1
