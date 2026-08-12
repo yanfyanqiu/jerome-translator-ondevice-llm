@@ -1,6 +1,9 @@
 name: build-jerome-apk
 
 on:
+  push:
+    paths:
+      - '.github/workflows/build.yml'
   workflow_dispatch: ~
 
 jobs:
