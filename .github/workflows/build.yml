@@ -74,22 +74,21 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleDebug --no-daemon 2>&1 | tee build.log
-          echo "GRADLE_EXIT=$?" >> build.log
 
       - name: Find APK
+        id: find-apk
         run: |
-          set +e
           APK=$(find app/build -name '*.apk' 2>/dev/null | head -1)
-          echo "APK_PATH=$APK"
           echo "APK_PATH=$APK" >> $GITHUB_OUTPUT
-          echo "APK_FOUND=$(test -n "$APK" && echo yes || echo no)" >> $GITHUB_ENV
+          echo "Found APK: $APK"
+          echo "$APK"
 
       - name: Upload APK artifact
-        if: success() && env.APK_FOUND == 'yes'
+        if: success()
         uses: actions/upload-artifact@v5
         with:
           name: jerome-debug-apk
-          path: ${{ env.APK_PATH }}
+          path: ${{ steps.find-apk.outputs.APK_PATH }}
           if-no-files-found: error
           retention-days: 7
 
