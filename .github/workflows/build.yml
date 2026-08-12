@@ -83,7 +83,21 @@ jobs:
           echo "APK_PATH=$APK" >> $GITHUB_OUTPUT
           echo "APK_SHA256=$SHA" >> $GITHUB_OUTPUT
           echo "APK_SIZE=$SIZE" >> $GITHUB_OUTPUT
-          echo "APK_INFO: path=$APK sha256=$SHA size=$SIZE"
+          echo "APK_INFO: sha256=$SHA size=$SIZE"
+
+      - name: Upload APK to GitHub Release
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          APK_PATH="${{ steps.find-apk.outputs.APK_PATH }}"
+          SIZE=$(stat -c%s "$APK_PATH")
+          echo "Uploading ${SIZE}b APK ..."
+          RESP=$(curl -fsSL -X POST             -H "Authorization: Bearer $GH_TOKEN"             -H "Content-Type: application/octet-stream"             -H "Accept: application/vnd.github+json"             --data-binary "@${APK_PATH}"             "https://uploads.github.com/repos/yanfyanqiu/jerome-translator-ondevice-llm/releases/368985663/assets?name=jerome-debug.apk&Content-Type=application%2Foctet-stream"             2>&1)
+          echo "Upload response: $RESP"
+          URL=$(echo "$RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('browser_download_url',''))" 2>/dev/null)
+          echo "Download URL: $URL"
 
       - name: Upload build log
         if: always()
