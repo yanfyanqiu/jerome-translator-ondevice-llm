@@ -48,23 +48,26 @@ jobs:
 
       - name: Add local.properties
         run: |
-          cat > local.properties <<EOF
-          sdk.dir=$ANDROID_HOME
-          ndk.dir=$ANDROID_HOME/ndk/26.1.10909125
-          EOF
+          printf 'sdk.dir=%s\nndk.dir=%s\n' "$ANDROID_HOME" "$ANDROID_HOME/ndk/26.1.10909125" > local.properties
+        shell: bash
 
       - name: Configure gradle properties
         run: |
-          cat >> gradle.properties <<EOF
-          android.useAndroidX=true
-          android.suppressUnsupportedCompileSdk=34
-          org.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8
-          EOF
+          printf 'android.useAndroidX=true\nandroid.suppressUnsupportedCompileSdk=34\norg.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8\n' >> gradle.properties
+        shell: bash
+
+      - name: Verify workspace
+        run: |
+          ls -la
+          ls gradlew
+          cat gradle.properties
+        shell: bash
 
       - name: Build debug APK
         run: |
           chmod +x gradlew
-          ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1 | tee build-output.log
+          ./gradlew :app:assembleDebug --no-daemon --stacktrace 2>&1 | tee build-output.log; exit ${PIPESTATUS[0]}
+        shell: bash
         continue-on-error: true
 
       - name: Upload build output log
@@ -79,9 +82,8 @@ jobs:
         if: success()
         run: |
           ls -la app/build/outputs/apk/debug/
-          APK=$(ls app/build/outputs/apk/debug/*.apk 2>/dev/null | head -1)
-          echo "apk=$APK" >> $GITHUB_OUTPUT
-          echo "APK_PATH=$APK" >> $GITHUB_ENV
+          echo "APK_PATH=$(ls app/build/outputs/apk/debug/*.apk 2>/dev/null | head -1)" >> $GITHUB_OUTPUT
+        shell: bash
 
       - name: Upload APK artifact
         if: success()
