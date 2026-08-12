@@ -97,37 +97,35 @@ jobs:
         env:
           GH_TOKEN: ${ secrets.GITHUB_TOKEN }
           APK_PATH: ${ steps.find-apk.outputs.APK_PATH }
-          APK_SHA256: ${ steps.find-apk.outputs.APK_SHA256 }
-          APK_SIZE: ${ steps.find-apk.outputs.APK_SIZE }
         run: |
-          python3 << 'PY'
+          python3 -c "
           import json, urllib.request, urllib.error, os, sys
-          apk_path = os.environ["APK_PATH"]
-          gh_token = os.environ["GH_TOKEN"]
-          repo = "yanfyanqiu/jerome-translator-ondevice-llm"
+          apk_path = os.environ['APK_PATH']
+          gh_token = os.environ['GH_TOKEN']
+          repo = 'yanfyanqiu/jerome-translator-ondevice-llm'
           release_id = 368985663
-          with open(apk_path, "rb") as f:
+          with open(apk_path, 'rb') as f:
               data = f.read()
-          print(f"APK size: {len(data)} bytes")
-          url = f"https://uploads.github.com/repos/{repo}/releases/{release_id}/assets?name=jerome-debug.apk"
+          print(f'APK size: {len(data)} bytes')
+          url = f'https://uploads.github.com/repos/{repo}/releases/{release_id}/assets?name=jerome-debug.apk'
           req = urllib.request.Request(
               url, data=data,
               headers={
-                  "Authorization": f"Bearer {gh_token}",
-                  "Content-Type": "application/octet-stream",
-                  "Accept": "application/vnd.github+json",
+                  'Authorization': f'Bearer {gh_token}',
+                  'Content-Type': 'application/octet-stream',
+                  'Accept': 'application/vnd.github+json',
               },
-              method="POST"
+              method='POST'
           )
           try:
               with urllib.request.urlopen(req, timeout=120) as resp:
                   result = json.loads(resp.read())
-                  print(f"SUCCESS: {result.get('browser_download_url','')}")
+                  print(f'SUCCESS: {result.get("browser_download_url","")}')
           except urllib.error.HTTPError as e:
-              body = e.read().decode("utf-8", errors="replace")
-              print(f"HTTP {e.code} error: {body[:500]}")
+              body = e.read().decode('utf-8', errors='replace')
+              print(f'HTTP {e.code} error: {body[:500]}')
               sys.exit(1)
-          PY
+          "
 
       - name: Upload build log
         if: always()
