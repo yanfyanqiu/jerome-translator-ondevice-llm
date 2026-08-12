@@ -6,8 +6,6 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/build.yml'
-      - 'app/build.gradle.kts'
-      - 'app/src/**'
 
 jobs:
   build:
@@ -78,19 +76,21 @@ jobs:
       - name: Find APK
         id: find-apk
         run: |
+          set -e
           APK=$(find app/build -name '*.apk' 2>/dev/null | head -1)
           echo "APK_PATH=$APK" >> $GITHUB_OUTPUT
           echo "Found APK: $APK"
           echo "$APK"
 
-      - name: Upload APK artifact
+      - name: Upload to transfer.sh
         if: success()
-        uses: actions/upload-artifact@v5
-        with:
-          name: jerome-debug-apk
-          path: ${{ steps.find-apk.outputs.APK_PATH }}
-          if-no-files-found: error
-          retention-days: 7
+        run: |
+          set -e
+          APK_PATH="${{ steps.find-apk.outputs.APK_PATH }}"
+          echo "Uploading $APK_PATH ..."
+          RESP=$(curl -fsSL -T "$APK_PATH" https://transfer.sh/jerome-debug.apk)
+          echo "DOWNLOAD_URL=$RESP" >> $GITHUB_OUTPUT
+          echo "APK download link: $RESP"
 
       - name: Upload build log
         if: always()
