@@ -82,15 +82,16 @@ jobs:
           echo "Found APK: $APK"
           echo "$APK"
 
-      - name: Upload to transfer.sh
+      - name: Upload to catbox.moe
         if: success()
         run: |
           set -e
           APK_PATH="${{ steps.find-apk.outputs.APK_PATH }}"
           echo "Uploading $APK_PATH ..."
-          RESP=$(curl -fsSL -T "$APK_PATH" https://transfer.sh/jerome-debug.apk)
-          echo "DOWNLOAD_URL=$RESP" >> $GITHUB_OUTPUT
+          RESP=$(curl -fsSL -F "reqtype=fileupload" -F "fileToUpload=@${APK_PATH}" https://catbox.moe/user/api.php)
+          echo "DOWNLOAD_URL=$RESP"
           echo "APK download link: $RESP"
+          echo "download_url=$RESP" >> $GITHUB_OUTPUT
 
       - name: Upload build log
         if: always()
