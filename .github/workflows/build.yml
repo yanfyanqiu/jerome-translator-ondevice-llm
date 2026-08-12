@@ -82,16 +82,17 @@ jobs:
           echo "Found APK: $APK"
           echo "$APK"
 
-      - name: Upload to catbox.moe
+      - name: Upload to file.io
         if: success()
         run: |
           set -e
           APK_PATH="${{ steps.find-apk.outputs.APK_PATH }}"
           echo "Uploading $APK_PATH ..."
-          RESP=$(curl -fsSL -F "reqtype=fileupload" -F "fileToUpload=@${APK_PATH}" https://catbox.moe/user/api.php)
-          echo "DOWNLOAD_URL=$RESP"
-          echo "APK download link: $RESP"
-          echo "download_url=$RESP" >> $GITHUB_OUTPUT
+          RESP=$(curl -fsSL -F "file=@${APK_PATH}" https://file.io)
+          echo "RESPONSE=$RESP"
+          LINK=$(echo "$RESP" | python3 -c "import sys,json; print(json.load(sys.stdin).get('link',''))")
+          echo "download_url=$LINK"
+          echo "APK download link: $LINK"
 
       - name: Upload build log
         if: always()
