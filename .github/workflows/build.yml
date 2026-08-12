@@ -43,7 +43,11 @@ jobs:
 
       - name: Install NDK + platforms + build-tools
         run: |
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager             "platforms;android-34"             "build-tools;34.0.0"             "ndk;25.1.8937393"             "cmake;3.22.1"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+            "platforms;android-34" \
+            "build-tools;34.0.0" \
+            "ndk;25.1.8937393" \
+            "cmake;3.22.1"
 
       - name: Download gradle wrapper
         run: |
@@ -53,7 +57,10 @@ jobs:
           #!/bin/sh
           APP_BASE_NAME=$(basename "$0")
           CLASSPATH=$(dirname "$0")/gradle/wrapper/gradle-wrapper.jar
-          exec java "-Xmx64m" "-Xms64m" $JAVA_OPTS $GRADLE_OPTS             "-Dorg.gradle.appname=$APP_BASE_NAME"             -classpath "$CLASSPATH"             org.gradle.wrapper.GradleWrapperMain "$@"
+          exec java "-Xmx64m" "-Xms64m" $JAVA_OPTS $GRADLE_OPTS \
+            "-Dorg.gradle.appname=$APP_BASE_NAME" \
+            -classpath "$CLASSPATH" \
+            org.gradle.wrapper.GradleWrapperMain "$@"
           WRAPPER_SCRIPT
           chmod +x gradlew
 
@@ -91,13 +98,39 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
-          APK_PATH="${{ steps.find-apk.outputs.APK_PATH }}"
-          SIZE=$(stat -c%s "$APK_PATH")
-          echo "Uploading ${SIZE}b APK ..."
-          RESP=$(curl -fsSL -X POST             -H "Authorization: Bearer $GH_TOKEN"             -H "Content-Type: application/octet-stream"             -H "Accept: application/vnd.github+json"             --data-binary "@${APK_PATH}"             "https://uploads.github.com/repos/yanfyanqiu/jerome-translator-ondevice-llm/releases/368985663/assets?name=jerome-debug.apk&Content-Type=application%2Foctet-stream"             2>&1)
-          echo "Upload response: $RESP"
-          URL=$(echo "$RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('browser_download_url',''))" 2>/dev/null)
-          echo "Download URL: $URL"
+          python3 << 'PY'
+          import json, urllib.request, urllib.error, os, sys
+
+          apk_path = os.environ["APK_PATH"]
+          gh_token = os.environ["GH_TOKEN"]
+          repo = "yanfyanqiu/jerome-translator-ondevice-llm"
+          release_id = 368985663
+
+          with open(apk_path, "rb") as f:
+              data = f.read()
+
+          print(f"APK size: {{len(data)}} bytes")
+
+          url = f"https://uploads.github.com/repos/{{repo}}/releases/{{release_id}}/assets?name=jerome-debug.apk"
+          req = urllib.request.Request(
+              url,
+              data=data,
+              headers={{
+                  "Authorization": f"Bearer {{gh_token}}",
+                  "Content-Type": "application/octet-stream",
+                  "Accept": "application/vnd.github+json",
+              }},
+              method="POST"
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=120) as resp:
+                  result = json.loads(resp.read())
+                  print(f"SUCCESS: {{result.get('browser_download_url',''}}")
+          except urllib.error.HTTPError as e:
+              body = e.read().decode("utf-8", errors="replace")
+              print(f"HTTP {{e.code}} error: {{body[:500]}}")
+              sys.exit(1)
+          PY
 
       - name: Upload build log
         if: always()
