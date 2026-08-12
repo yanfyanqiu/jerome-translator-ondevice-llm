@@ -80,7 +80,7 @@ class ConferenceViewModel(application: Application) : AndroidViewModel(applicati
             val hasChinese = text.codePoints().anyMatch { cp -> (cp in 0x4E00..0x9FFF) || (cp in 0x3400..0x4DBF) }
             if (hasChinese) return "zh"
             val raw: TranslationResult = engine.translate(text)
-            val code = raw.text.trim().lowercase().split("\s+".toRegex()).firstOrNull() ?: "en"
+            val code = raw.text.trim().lowercase().split(Regex("""\s+""")).firstOrNull() ?: "en"
             return if (Languages.ALL.map { it.code }.toSet().contains(code)) code else "en"
         } catch (e: Exception) { Log.w("ConferenceVM", "lang detection failed", e); return "en" }
     }
@@ -117,7 +117,8 @@ class ConferenceViewModel(application: Application) : AndroidViewModel(applicati
             val result: TranslationResult = engine.translate(text)
             val translated = result.text
             _state.update { it.copy(isTranslating = false, lastOutputText = translated, statusText = "Speaking...", isSpeaking = true) }
-            speechInput.stopListening()
+            // Cancel listening coroutine to stop the recognizer (echo suppression)
+            listenJob?.cancel()
             _state.update { it.copy(isListening = false) }
             if (translated.isNotBlank()) {
                 speechOutput.speak(translated, actualTgt.code)
@@ -165,7 +166,6 @@ class ConferenceViewModel(application: Application) : AndroidViewModel(applicati
     fun stopConference() {
         autoLoopActive = false
         listenJob?.cancel()
-        speechInput.stopListening()
         speechOutput.stop()
         _state.update { it.copy(conferenceRunning = false, isListening = false, isSpeaking = false, isTranslating = false, statusText = "Conference Mode is off") }
     }
