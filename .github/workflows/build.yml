@@ -39,7 +39,11 @@ jobs:
 
       - name: Install NDK + platforms + build-tools
         run: |
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager             "platforms;android-34"             "build-tools;34.0.0"             "ndk;25.1.8937393"             "cmake;3.22.1"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+            "platforms;android-34" \
+            "build-tools;34.0.0" \
+            "ndk;25.1.8937393" \
+            "cmake;3.22.1"
 
       - name: Download gradle wrapper
         run: |
@@ -49,7 +53,10 @@ jobs:
           #!/bin/sh
           APP_BASE_NAME=$(basename "$0")
           CLASSPATH=$(dirname "$0")/gradle/wrapper/gradle-wrapper.jar
-          exec java "-Xmx64m" "-Xms64m" $JAVA_OPTS $GRADLE_OPTS             "-Dorg.gradle.appname=$APP_BASE_NAME"             -classpath "$CLASSPATH"             org.gradle.wrapper.GradleWrapperMain "$@"
+          exec java "-Xmx64m" "-Xms64m" $JAVA_OPTS $GRADLE_OPTS \
+            "-Dorg.gradle.appname=$APP_BASE_NAME" \
+            -classpath "$CLASSPATH" \
+            org.gradle.wrapper.GradleWrapperMain "$@"
           WRAPPER_SCRIPT
           chmod +x gradlew
 
