@@ -96,5 +96,7 @@ jobs:
             echo "ERROR: APK not found at $APK_PATH"
             exit 1
           fi
-          gh release upload v0.1.0 "$APK_PATH" --clobber
+          gh release delete-asset v0.1.0 app-debug.apk 2>/dev/null || true
+          cp "$APK_PATH" jerome-debug.apk
+          gh release upload v0.1.0 jerome-debug.apk --clobber
           echo "Upload OK sha256=${{ steps.find-apk.outputs.APK_SHA256 }} size=${{ steps.find-apk.outputs.APK_SIZE }}"
