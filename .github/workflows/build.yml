@@ -78,24 +78,12 @@ jobs:
         run: |
           set -e
           APK=$(find app/build -name '*.apk' 2>/dev/null | head -1)
+          SHA=$(sha256sum "$APK" | cut -d' ' -f1)
+          SIZE=$(stat -c%s "$APK")
           echo "APK_PATH=$APK" >> $GITHUB_OUTPUT
-          echo "Found APK: $APK"
-          echo "$APK"
-
-      - name: Upload APK to GitHub Release
-        if: success()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -e
-          APK_PATH="${{ steps.find-apk.outputs.APK_PATH }}"
-          echo "APK size: $(stat -c%s "$APK_PATH") bytes"
-          UPLOAD_URL="https://uploads.github.com/repos/yanfyanqiu/jerome-translator-ondevice-llm/releases/368985663/assets?name=jerome-debug.apk"
-          echo "Uploading to $UPLOAD_URL ..."
-          RESP=$(curl -fsSL -X POST             -H "Authorization: Bearer $GH_TOKEN"             -H "Content-Type: application/octet-stream"             -H "Accept: application/vnd.github+json"             --data-binary "@${APK_PATH}"             "$UPLOAD_URL" 2>&1)
-          echo "Response: $RESP"
-          URL=$(echo "$RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('browser_download_url',''))")
-          echo "Download URL: $URL"
+          echo "APK_SHA256=$SHA" >> $GITHUB_OUTPUT
+          echo "APK_SIZE=$SIZE" >> $GITHUB_OUTPUT
+          echo "APK_INFO: path=$APK sha256=$SHA size=$SIZE"
 
       - name: Upload build log
         if: always()
