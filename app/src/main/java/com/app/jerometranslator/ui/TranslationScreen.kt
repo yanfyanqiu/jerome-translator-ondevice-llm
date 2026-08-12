@@ -113,7 +113,7 @@ fun TranslationScreen(viewModel: TranslationViewModel) {
         drawerContent = {
             ModalDrawerSheet {
                 Text(
-                    "Jerome",
+                    "Jerome 翻译官",
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(16.dp),
                 )

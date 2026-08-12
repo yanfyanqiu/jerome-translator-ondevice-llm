@@ -154,7 +154,7 @@ fun StatisticsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("Reasoning", style = MaterialTheme.typography.bodyMedium)
+                        Text("推理", style = MaterialTheme.typography.bodyMedium)
                         Text(
                             if (state.noThinkEnabled) "已关闭" else "已开启",
                             style = MaterialTheme.typography.bodyMedium,

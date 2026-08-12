@@ -87,7 +87,7 @@ fun OnboardingScreen(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    "Before you start",
+                    "开始之前",
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onTertiaryContainer,
                 )
@@ -96,7 +96,7 @@ fun OnboardingScreen(
                     "翻译质量取决于所选档位与设备硬件。档位越高效果越好，但占用空间更大、速度更慢。不确定就选默认即可。效果因人而异——这是设备端实验性 AI。" +
                         "" +
                         "" +
-                        "Results may vary \u2014 this is experimental, on-device AI.",
+                        "",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onTertiaryContainer,
                 )
