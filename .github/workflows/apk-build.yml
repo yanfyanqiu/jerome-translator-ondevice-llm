@@ -11,6 +11,9 @@ permissions:
   contents: write
   actions: write
 
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -37,7 +40,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles("**/gradle-wrapper.properties") }}
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/gradle-wrapper.properties') }}
           restore-keys: |
             gradle-${{ runner.os }}-
 
@@ -47,11 +50,7 @@ jobs:
 
       - name: Install SDK components
         run: |
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
-            "platforms;android-34" \
-            "build-tools;34.0.0" \
-            "ndk;25.1.8937393" \
-            "cmake;3.22.1"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager             "platforms;android-34"             "build-tools;34.0.0"             "ndk;25.1.8937393"             "cmake;3.22.1"
 
       - name: Download Gradle wrapper
         run: |
@@ -97,19 +96,5 @@ jobs:
             echo "ERROR: APK not found at $APK_PATH"
             exit 1
           fi
-          # Delete existing asset with the same name (if any) so re-upload always works
-          ASSET_ID=$(curl -fsSL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/yanfyanqiu/jerome-translator-ondevice-llm/releases/368985663/assets" \
-            | python3 -c "import sys,json; a=json.load(sys.stdin); print(next((x['id'] for x in a if x['name']=='jerome-debug.apk'),''))")
-          if [ -n "$ASSET_ID" ]; then
-            echo "Deleting existing asset $ASSET_ID"
-            curl -fsSL -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              "https://api.github.com/repos/yanfyanqiu/jerome-translator-ondevice-llm/releases/assets/$ASSET_ID"
-          fi
-          # Upload fresh asset (curl -f fails the step on any HTTP error)
-          curl -f -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary "@$APK_PATH" \
-            "https://uploads.github.com/repos/yanfyanqiu/jerome-translator-ondevice-llm/releases/368985663/assets?name=jerome-debug.apk&label=Jerome+Translator+v0.1.0"
+          gh release upload v0.1.0 "$APK_PATH" --clobber --title "Jerome Translator v0.1.0"
           echo "Upload OK sha256=${{ steps.find-apk.outputs.APK_SHA256 }} size=${{ steps.find-apk.outputs.APK_SIZE }}"
