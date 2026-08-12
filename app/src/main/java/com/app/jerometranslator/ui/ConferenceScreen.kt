@@ -21,14 +21,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -72,23 +71,33 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
     val scope = rememberCoroutineScope()
     var showModelPicker by remember { mutableStateOf(false) }
 
-    val ggufPickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+    val ggufPickerLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
         if (uri != null) {
             context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             scope.launch {
                 val model = LocalModelManager(context).importModel(uri)
-                if (model != null) { viewModel.refreshLocalModels(); snackbar.showSnackbar("Imported: ${model.displayName}") }
-                else { snackbar.showSnackbar("Import failed - make sure it is a valid GGUF file.") }
+                if (model != null) {
+                    viewModel.refreshLocalModels()
+                    snackbar.showSnackbar("Imported: ${model.displayName}")
+                } else {
+                    snackbar.showSnackbar("Import failed - make sure it is a valid GGUF file.")
+                }
             }
         }
     }
 
-    val micPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+    val micPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
         if (granted) { if (!state.conferenceRunning) viewModel.setEnabled(true) }
         else { scope.launch { snackbar.showSnackbar("Microphone permission is required.") } }
     }
 
-    LaunchedEffect(state.error) { state.error?.let { snackbar.showSnackbar(it); viewModel.dismissError() } }
+    LaunchedEffect(state.error) {
+        state.error?.let { snackbar.showSnackbar(it); viewModel.dismissError() }
+    }
 
     val isRunning = state.conferenceRunning
     val statusColor by animateColorAsState(
@@ -103,20 +112,34 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
     )
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Conference Mode") }, actions = { IconButton(onClick = { viewModel.refreshLocalModels() }) { Icon(Icons.Default.Refresh, contentDescription = "Refresh") } }) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Conference Mode") },
+                actions = { IconButton(onClick = { viewModel.refreshLocalModels() }) { Icon(Icons.Default.Refresh, contentDescription = "Refresh") } },
+            )
+        },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             Spacer(Modifier.height(24.dp))
 
             OutlinedCard(modifier = Modifier.fillMaxWidth(), onClick = { showModelPicker = true }) {
-                Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text("Local Model", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(state.selectedLocalModel?.displayName ?: "No model - tap to import", style = MaterialTheme.typography.bodyMedium)
-                        state.selectedLocalModel?.let { Text(formatSize(it.sizeBytes), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                        state.selectedLocalModel?.let {
+                            Text(formatSize(it.sizeBytes), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                     }
-                    Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(Icons.Default.Refresh, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -124,35 +147,75 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                 FilledTonalButton(onClick = { }) { Text(state.sourceLanguage.displayName, maxLines = 1) }
-                IconButton(onClick = { viewModel.swapLanguages() }) { Icon(Icons.Default.SwapHoriz, contentDescription = "Swap") }
+                IconButton(onClick = { viewModel.swapLanguages() }) { Icon(Icons.Default.SwapHoriz, contentDescription = "Swap languages") }
                 FilledTonalButton(onClick = { }) { Text(state.targetLanguage.displayName, maxLines = 1) }
             }
 
             Spacer(Modifier.height(32.dp))
 
-            Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = statusColor.copy(alpha = 0.1f))) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = statusColor.copy(alpha = 0.1f)),
+            ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(28.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(modifier = Modifier.size(72.dp), contentAlignment = Alignment.Center) {
                         when {
-                            state.isSpeaking -> Icon(Icons.AutoMirrored.Filled.VolumeUp, modifier = Modifier.size(56.dp), contentDescription = null, tint = MaterialTheme.colorScheme.error)
-                            state.isTranslating -> CircularProgressIndicator(modifier = Modifier.size(56.dp), strokeWidth = 3.dp)
-                            state.isListening -> Icon(Icons.Default.Mic, modifier = Modifier.size(56.dp), contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                            isRunning -> Icon(Icons.Default.PlayArrow, modifier = Modifier.size(56.dp), contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                            else -> Icon(Icons.Default.MicOff, modifier = Modifier.size(56.dp), contentDescription = null, tint = MaterialTheme.colorScheme.outline)
+                            state.isSpeaking -> Icon(
+                                Icons.Default.VolumeUp,
+                                modifier = Modifier.size(56.dp),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                            )
+                            state.isTranslating -> CircularProgressIndicator(
+                                modifier = Modifier.size(56.dp),
+                                strokeWidth = 3.dp,
+                            )
+                            state.isListening -> Icon(
+                                Icons.Default.Mic,
+                                modifier = Modifier.size(56.dp),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                            isRunning -> Icon(
+                                Icons.Default.PlayArrow,
+                                modifier = Modifier.size(56.dp),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                            else -> Icon(
+                                Icons.Default.MicOff,
+                                modifier = Modifier.size(56.dp),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.outline,
+                            )
                         }
                     }
                     Spacer(Modifier.height(12.dp))
                     Text(state.statusText, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center, color = statusColor)
-                    if (state.detectedLanguage.isNotBlank()) { Spacer(Modifier.height(4.dp)); Text("Detected: ${state.detectedLanguage}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                    if (state.detectedLanguage.isNotBlank()) {
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "Detected: ${state.detectedLanguage}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
 
             Spacer(Modifier.height(24.dp))
 
             if (state.lastInputText.isNotBlank()) {
-                Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                ) {
                     Column(modifier = Modifier.padding(12.dp)) {
-                        Text("Heard (${state.sourceLanguage.displayName}):", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            "Heard (${state.sourceLanguage.displayName}):",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                         Text(state.lastInputText, style = MaterialTheme.typography.bodyMedium)
                     }
                 }
@@ -160,10 +223,21 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
             }
 
             if (state.lastOutputText.isNotBlank()) {
-                Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                ) {
                     Column(modifier = Modifier.padding(12.dp)) {
-                        Text("Translation (${state.targetLanguage.displayName}):", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f))
-                        Text(state.lastOutputText, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        Text(
+                            "Translation (${state.targetLanguage.displayName}):",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                        )
+                        Text(
+                            state.lastOutputText,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
                     }
                 }
             }
@@ -193,7 +267,11 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                     CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                     Spacer(Modifier.width(8.dp))
-                    Text("Loading model... (first start takes a moment)", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        "Loading model... (first start takes a moment)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
 
@@ -202,25 +280,52 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
     }
 
     if (showModelPicker) {
-        ModalBottomSheet(onDismissRequest = { showModelPicker = false }, sheetState = rememberModalBottomSheetState()) {
+        ModalBottomSheet(
+            onDismissRequest = { showModelPicker = false },
+            sheetState = rememberModalBottomSheetState(),
+        ) {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 Text("Local GGUF Models", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 12.dp))
+
                 if (state.availableLocalModels.isEmpty()) {
-                    Text("No models imported yet.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 16.dp))
+                    Text(
+                        "No models imported yet.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(vertical = 16.dp),
+                    )
                 }
+
                 state.availableLocalModels.forEach { model ->
-                    OutlinedCard(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), onClick = { viewModel.selectLocalModel(model); showModelPicker = false }) {
-                        Row(modifier = Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedCard(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        onClick = { viewModel.selectLocalModel(model); showModelPicker = false },
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
                             Column {
                                 Text(model.displayName, style = MaterialTheme.typography.bodyMedium)
-                                Text(formatSize(model.sizeBytes), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(
+                                    formatSize(model.sizeBytes),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
                             }
-                            if (model.id == state.selectedLocalModel?.id) { Icon(Icons.Default.Mic, contentDescription = "Active", tint = MaterialTheme.colorScheme.primary) }
+                            if (model.id == state.selectedLocalModel?.id) {
+                                Icon(Icons.Default.Mic, contentDescription = "Active", tint = MaterialTheme.colorScheme.primary)
+                            }
                         }
                     }
                 }
+
                 Spacer(Modifier.height(16.dp))
-                Button(onClick = { showModelPicker = false; ggufPickerLauncher.launch(arrayOf("*/*")) }, modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    onClick = { showModelPicker = false; ggufPickerLauncher.launch(arrayOf("*/*")) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
                     Icon(Icons.Default.Refresh, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
                     Text("Import GGUF from Device")
