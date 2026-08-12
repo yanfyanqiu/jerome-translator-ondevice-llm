@@ -57,8 +57,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.app.jerometranslator.R
 import com.app.jerometranslator.download.LocalModelManager
 import kotlinx.coroutines.launch
 
@@ -80,9 +82,9 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
                 val model = LocalModelManager(context).importModel(uri)
                 if (model != null) {
                     viewModel.refreshLocalModels()
-                    snackbar.showSnackbar("Imported: ${model.displayName}")
+                    snackbar.showSnackbar(context.getString(R.string.import_success, model.displayName))
                 } else {
-                    snackbar.showSnackbar("Import failed - make sure it is a valid GGUF file.")
+                    snackbar.showSnackbar(context.getString(R.string.import_failed))
                 }
             }
         }
@@ -92,7 +94,7 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) { if (!state.conferenceRunning) viewModel.setEnabled(true) }
-        else { scope.launch { snackbar.showSnackbar("Microphone permission is required.") } }
+        else { scope.launch { snackbar.showSnackbar(context.getString(R.string.mic_permission_required)) } }
     }
 
     LaunchedEffect(state.error) {
@@ -111,17 +113,30 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
         label = "statusColor"
     )
 
+    val resolvedStatusText = when {
+        state.isSpeaking -> stringResource(R.string.speaking)
+        state.isTranslating -> stringResource(R.string.translating)
+        state.isListening -> stringResource(R.string.listening)
+        isRunning -> stringResource(R.string.listening)
+        else -> stringResource(R.string.conference_mode_off)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Conference Mode") },
-                actions = { IconButton(onClick = { viewModel.refreshLocalModels() }) { Icon(Icons.Default.Refresh, contentDescription = "Refresh") } },
+                title = { Text(stringResource(R.string.conference_mode)) },
+                actions = {
+                    IconButton(onClick = { viewModel.refreshLocalModels() }) {
+                        Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh))
+                    }
+                },
             )
         },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp).verticalScroll(rememberScrollState()),
+            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(Modifier.height(24.dp))
@@ -133,22 +148,48 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Local Model", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(state.selectedLocalModel?.displayName ?: "No model - tap to import", style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            stringResource(R.string.local_model),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Text(
+                            state.selectedLocalModel?.displayName
+                                ?: stringResource(R.string.no_model_tap_import),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
                         state.selectedLocalModel?.let {
-                            Text(formatSize(it.sizeBytes), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(
+                                formatSize(it.sizeBytes),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                         }
                     }
-                    Icon(Icons.Default.Refresh, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(
+                        Icons.Default.Refresh,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
 
             Spacer(Modifier.height(12.dp))
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                FilledTonalButton(onClick = { }) { Text(state.sourceLanguage.displayName, maxLines = 1) }
-                IconButton(onClick = { viewModel.swapLanguages() }) { Icon(Icons.Default.SwapHoriz, contentDescription = "Swap languages") }
-                FilledTonalButton(onClick = { }) { Text(state.targetLanguage.displayName, maxLines = 1) }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                FilledTonalButton(onClick = { }) {
+                    Text(state.sourceLanguage.displayName, maxLines = 1)
+                }
+                IconButton(onClick = { viewModel.swapLanguages() }) {
+                    Icon(Icons.Default.SwapHoriz, contentDescription = stringResource(R.string.swap_languages))
+                }
+                FilledTonalButton(onClick = { }) {
+                    Text(state.targetLanguage.displayName, maxLines = 1)
+                }
             }
 
             Spacer(Modifier.height(32.dp))
@@ -157,7 +198,10 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = statusColor.copy(alpha = 0.1f)),
             ) {
-                Column(modifier = Modifier.fillMaxWidth().padding(28.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(28.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
                     Box(modifier = Modifier.size(72.dp), contentAlignment = Alignment.Center) {
                         when {
                             state.isSpeaking -> Icon(
@@ -191,11 +235,16 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
                         }
                     }
                     Spacer(Modifier.height(12.dp))
-                    Text(state.statusText, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center, color = statusColor)
+                    Text(
+                        resolvedStatusText,
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                        color = statusColor,
+                    )
                     if (state.detectedLanguage.isNotBlank()) {
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            "Detected: ${state.detectedLanguage}",
+                            stringResource(R.string.detected, state.detectedLanguage),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -212,7 +261,7 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Text(
-                            "Heard (${state.sourceLanguage.displayName}):",
+                            stringResource(R.string.heard_label, state.sourceLanguage.displayName),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -229,7 +278,7 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Text(
-                            "Translation (${state.targetLanguage.displayName}):",
+                            stringResource(R.string.translation_label, state.targetLanguage.displayName),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
                         )
@@ -248,27 +297,38 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
                 onClick = {
                     if (isRunning) viewModel.setEnabled(false)
                     else {
-                        val hasMic = context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+                        val hasMic = context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) ==
+                            PackageManager.PERMISSION_GRANTED
                         if (hasMic) viewModel.setEnabled(true)
                         else micPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(64.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = if (isRunning) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error) else ButtonDefaults.buttonColors(),
+                colors = if (isRunning) ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                ) else ButtonDefaults.buttonColors(),
             ) {
                 Icon(if (isRunning) Icons.Default.Stop else Icons.Default.PlayArrow, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text(if (isRunning) "Stop Conference" else "Start Conference", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    if (isRunning) stringResource(R.string.stop_conference)
+                    else stringResource(R.string.start_conference),
+                    style = MaterialTheme.typography.titleMedium,
+                )
             }
 
             if (!state.isModelLoaded && state.selectedLocalModel != null) {
                 Spacer(Modifier.height(8.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        "Loading model... (first start takes a moment)",
+                        stringResource(R.string.loading_model),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -285,11 +345,15 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
             sheetState = rememberModalBottomSheetState(),
         ) {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                Text("Local GGUF Models", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 12.dp))
+                Text(
+                    stringResource(R.string.local_gguf_models),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 12.dp),
+                )
 
                 if (state.availableLocalModels.isEmpty()) {
                     Text(
-                        "No models imported yet.",
+                        stringResource(R.string.no_models_imported),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(vertical = 16.dp),
@@ -299,7 +363,10 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
                 state.availableLocalModels.forEach { model ->
                     OutlinedCard(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        onClick = { viewModel.selectLocalModel(model); showModelPicker = false },
+                        onClick = {
+                            viewModel.selectLocalModel(model)
+                            showModelPicker = false
+                        },
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(12.dp),
@@ -315,7 +382,11 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
                                 )
                             }
                             if (model.id == state.selectedLocalModel?.id) {
-                                Icon(Icons.Default.Mic, contentDescription = "Active", tint = MaterialTheme.colorScheme.primary)
+                                Icon(
+                                    Icons.Default.Mic,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
                             }
                         }
                     }
@@ -328,7 +399,7 @@ fun ConferenceScreen(viewModel: ConferenceViewModel) {
                 ) {
                     Icon(Icons.Default.Refresh, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Import GGUF from Device")
+                    Text(stringResource(R.string.import_gguf_desc))
                 }
                 Spacer(Modifier.height(32.dp))
             }
