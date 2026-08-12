@@ -1,11 +1,7 @@
 name: build-jerome-apk
 
 on:
-  workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/build.yml'
+  workflow_dispatch: ~
 
 jobs:
   build:
@@ -22,7 +18,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           java-version: '17'
-          distribution: 'temurin'
+          distribution: temurin
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
@@ -43,11 +39,7 @@ jobs:
 
       - name: Install NDK + platforms + build-tools
         run: |
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
-            "platforms;android-34" \
-            "build-tools;34.0.0" \
-            "ndk;25.1.8937393" \
-            "cmake;3.22.1"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager             "platforms;android-34"             "build-tools;34.0.0"             "ndk;25.1.8937393"             "cmake;3.22.1"
 
       - name: Download gradle wrapper
         run: |
@@ -57,10 +49,7 @@ jobs:
           #!/bin/sh
           APP_BASE_NAME=$(basename "$0")
           CLASSPATH=$(dirname "$0")/gradle/wrapper/gradle-wrapper.jar
-          exec java "-Xmx64m" "-Xms64m" $JAVA_OPTS $GRADLE_OPTS \
-            "-Dorg.gradle.appname=$APP_BASE_NAME" \
-            -classpath "$CLASSPATH" \
-            org.gradle.wrapper.GradleWrapperMain "$@"
+          exec java "-Xmx64m" "-Xms64m" $JAVA_OPTS $GRADLE_OPTS             "-Dorg.gradle.appname=$APP_BASE_NAME"             -classpath "$CLASSPATH"             org.gradle.wrapper.GradleWrapperMain "$@"
           WRAPPER_SCRIPT
           chmod +x gradlew
 
@@ -108,15 +97,7 @@ with open(apk_path, 'rb') as f:
     data = f.read()
 print('APK size: ' + str(len(data)) + ' bytes')
 url = 'https://uploads.github.com/repos/' + repo + '/releases/' + str(release_id) + '/assets?name=jerome-debug.apk'
-req = urllib.request.Request(
-    url, data=data,
-    headers={
-        'Authorization': 'Bearer ' + gh_token,
-        'Content-Type': 'application/octet-stream',
-        'Accept': 'application/vnd.github+json',
-    },
-    method='POST'
-)
+req = urllib.request.Request(url, data=data, headers={'Authorization': 'Bearer ' + gh_token, 'Content-Type': 'application/octet-stream', 'Accept': 'application/vnd.github+json'}, method='POST')
 try:
     with urllib.request.urlopen(req, timeout=120) as resp:
         result = json.loads(resp.read())
